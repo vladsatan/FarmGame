@@ -7,10 +7,18 @@ public class FirstPersonMove : MonoBehaviour
     public float runSpeed = 8f;
 
     public float walkSpeed = 5f;
+
+    public float gravity = -25f;
+
+    public float jumpForce = 7f;
+
+    private float velocityY;
+
     private CharacterController controller;
     public void Start ()
     {
         controller = GetComponent<CharacterController>();
+        velocityY = 0f;
     }
 
     public void Update ()
@@ -19,6 +27,13 @@ public class FirstPersonMove : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
 
         bool run = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool jump = Input.GetKeyDown(KeyCode.Space);
+
+        bool grounded = controller.isGrounded;  
+
+        if (grounded && velocityY < 0f) velocityY = -2f;
+        if (grounded && jump) velocityY = jumpForce;
+        velocityY += gravity * Time.deltaTime;
 
         if(run && z > 0){moveSpeed = runSpeed;}
         else{moveSpeed = walkSpeed;}
@@ -31,7 +46,11 @@ public class FirstPersonMove : MonoBehaviour
 
         if(direction.magnitude > 1f){direction = direction.normalized;}
         
-        controller.Move(direction * moveSpeed * Time.deltaTime);
+        direction *= moveSpeed;
+
+        direction.y = velocityY;
+
+        controller.Move(direction * Time.deltaTime);
 
     }
 }
